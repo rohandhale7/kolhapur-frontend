@@ -21,8 +21,9 @@ function EditProperty() {
   });
 
   useEffect(() => {
-    fetchProperty();
-  }, []);
+  fetchProperty();
+  // eslint-disable-next-line
+}, []);
 
   const fetchProperty = async () => {
     try {

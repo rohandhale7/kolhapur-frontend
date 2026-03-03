@@ -14,9 +14,10 @@ function Home() {
     sortBy: "",
   });
 
-  useEffect(() => {
-    fetchProperties();
-  }, [page, filters]);
+ useEffect(() => {
+  fetchProperties();
+  // eslint-disable-next-line
+}, [page, filters]);
 
   const fetchProperties = async () => {
     try {

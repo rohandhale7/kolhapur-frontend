@@ -7,8 +7,9 @@ function PropertyDetails() {
   const [property, setProperty] = useState(null);
 
   useEffect(() => {
-    fetchProperty();
-  }, []);
+  fetchProperty();
+  // eslint-disable-next-line
+}, []);
 
   const fetchProperty = async () => {
     try {
