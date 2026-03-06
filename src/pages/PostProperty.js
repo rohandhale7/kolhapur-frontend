@@ -1,175 +1,131 @@
 import React, { useState } from "react";
-import axios from "../api/axios";
-import { useNavigate } from "react-router-dom";
+import API from "../services/api";
 
 function PostProperty() {
-  const navigate = useNavigate();
 
-  const [submitting, setSubmitting] = useState(false);
-
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    price: "",
-    location: "",
-    type: "flat",
-    postedByType: "owner",
-    contactNumber: "",
-    image: null
-  });
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  const handleFileChange = (e) => {
-    setFormData({
-      ...formData,
-      image: e.target.files[0]
-    });
-  };
+  const [title, setTitle] = useState("");
+  const [price, setPrice] = useState("");
+  const [city, setCity] = useState("");
+  const [propertyType, setPropertyType] = useState("Apartment");
+  const [listingType, setListingType] = useState("Sale");
+  const [description, setDescription] = useState("");
+  const [image, setImage] = useState(null);
 
   const handleSubmit = async (e) => {
+
     e.preventDefault();
 
-    if (submitting) return; // Prevent double submit
-    setSubmitting(true);
-
     try {
-      const formDataObj = new FormData();
 
-      formDataObj.append("title", formData.title);
-      formDataObj.append("description", formData.description);
-      formDataObj.append("price", formData.price);
-      formDataObj.append("location", formData.location);
-      formDataObj.append("type", formData.type);
-      formDataObj.append("postedByType", formData.postedByType);
-      formDataObj.append("contactNumber", formData.contactNumber);
+      let imageUrl = "";
 
-      if (formData.image) {
-        formDataObj.append("image", formData.image);
+      if (image) {
+
+        const imgData = new FormData();
+        imgData.append("image", image);
+
+        const uploadRes = await API.post("/properties/upload", imgData);
+
+        imageUrl = uploadRes.data.imageUrl;
+
       }
 
-      await axios.post("/api/properties", formDataObj);
+      await API.post("/properties", {
 
-      navigate("/my-properties");
+        title,
+        price,
+        city,
+        propertyType,
+        listingType,
+        description,
+        images: [imageUrl]
+
+      });
+
+      alert("Property posted successfully");
 
     } catch (error) {
-      console.log("SUBMIT ERROR:", error);
-    } finally {
-      setSubmitting(false);
+
+      console.log(error);
+
+      alert("Error posting property");
+
     }
+
   };
 
   return (
-    <div style={{ background: "#f5f5f5", minHeight: "100vh", padding: "40px" }}>
-      <div
-        style={{
-          maxWidth: "600px",
-          margin: "0 auto",
-          background: "white",
-          padding: "30px",
-          borderRadius: "10px",
-          boxShadow: "0 5px 20px rgba(0,0,0,0.08)",
-        }}
-      >
-        <h2 style={{ marginBottom: "20px" }}>Post Property</h2>
 
-        <form onSubmit={handleSubmit} encType="multipart/form-data">
+    <div style={{ padding: "40px" }}>
 
-          <input
-            type="file"
-            name="image"
-            onChange={handleFileChange}
-            style={{ marginBottom: "15px" }}
-          />
+      <h2>Post Property</h2>
 
-          <input
-            name="title"
-            placeholder="Title"
-            onChange={handleChange}
-            required
-            style={inputStyle}
-          />
+      <form onSubmit={handleSubmit}>
 
-          <textarea
-            name="description"
-            placeholder="Description"
-            onChange={handleChange}
-            required
-            style={{ ...inputStyle, height: "80px" }}
-          />
+        <input
+          placeholder="Title"
+          onChange={(e) => setTitle(e.target.value)}
+        />
 
-          <input
-            name="price"
-            type="number"
-            placeholder="Price"
-            onChange={handleChange}
-            required
-            style={inputStyle}
-          />
+        <br /><br />
 
-          <input
-            name="location"
-            placeholder="Location"
-            onChange={handleChange}
-            required
-            style={inputStyle}
-          />
+        <input
+          placeholder="Price"
+          onChange={(e) => setPrice(e.target.value)}
+        />
 
-          <select name="type" onChange={handleChange} style={inputStyle}>
-            <option value="flat">Flat</option>
-            <option value="house">House</option>
-            <option value="plot">Plot</option>
-          </select>
+        <br /><br />
 
-          <select name="postedByType" onChange={handleChange} style={inputStyle}>
-            <option value="owner">Owner</option>
-            <option value="broker">Broker</option>
-            <option value="builder">Builder</option>
-          </select>
+        <input
+          placeholder="City"
+          onChange={(e) => setCity(e.target.value)}
+        />
 
-          <input
-            name="contactNumber"
-            placeholder="Contact Number"
-            onChange={handleChange}
-            required
-            style={inputStyle}
-          />
+        <br /><br />
 
-          <button
-            type="submit"
-            style={buttonStyle}
-            disabled={submitting}
-          >
-            {submitting ? "Posting..." : "Submit"}
-          </button>
+        <select onChange={(e) => setPropertyType(e.target.value)}>
 
-        </form>
-      </div>
+          <option value="Apartment">Apartment</option>
+          <option value="House">House</option>
+          <option value="Plot">Plot</option>
+
+        </select>
+
+        <br /><br />
+
+        <select onChange={(e) => setListingType(e.target.value)}>
+
+          <option value="Sale">Sale</option>
+          <option value="Rent">Rent</option>
+
+        </select>
+
+        <br /><br />
+
+        <textarea
+          placeholder="Description"
+          onChange={(e) => setDescription(e.target.value)}
+        />
+
+        <br /><br />
+
+        <input
+          type="file"
+          onChange={(e) => setImage(e.target.files[0])}
+        />
+
+        <br /><br />
+
+        <button type="submit">
+          Submit Property
+        </button>
+
+      </form>
+
     </div>
+
   );
+
 }
-
-const inputStyle = {
-  width: "100%",
-  padding: "10px",
-  marginBottom: "15px",
-  borderRadius: "6px",
-  border: "1px solid #ccc",
-};
-
-const buttonStyle = {
-  width: "100%",
-  padding: "12px",
-  backgroundColor: "#111",
-  color: "white",
-  border: "none",
-  borderRadius: "6px",
-  cursor: "pointer",
-};
 
 export default PostProperty;

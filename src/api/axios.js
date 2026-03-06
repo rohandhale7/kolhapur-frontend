@@ -1,7 +1,14 @@
 import axios from "axios";
+import axiosRetry from "axios-retry";
 
 const instance = axios.create({
-  baseURL: "https://kolhapur-backend.onrender.com"
+  baseURL: process.env.REACT_APP_API_URL,
+  timeout: 10000
+});
+
+axiosRetry(instance, {
+  retries: 3,
+  retryDelay: axiosRetry.exponentialDelay
 });
 
 instance.interceptors.request.use((config) => {
